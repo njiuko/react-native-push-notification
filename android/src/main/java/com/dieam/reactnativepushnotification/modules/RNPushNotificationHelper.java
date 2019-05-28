@@ -140,12 +140,6 @@ public class RNPushNotificationHelper {
                 return;
             }
 
-            if (bundle.getString("message") == null) {
-                // this happens when a 'data' notification is received - we do not synthesize a local notification in this case
-                Log.d(LOG_TAG, "Cannot send to notification centre because there is no 'message' field in: " + bundle);
-                return;
-            }
-
             String notificationIdString = bundle.getString("id");
             if (notificationIdString == null) {
                 Log.e(LOG_TAG, "No notification ID specified for the notification");
@@ -217,7 +211,12 @@ public class RNPushNotificationHelper {
                 notification.setGroup(group);
             }
 
-            notification.setContentText(bundle.getString("message"));
+            if (bundle.getString("message") == null) {
+                // this happens when a 'data' notification is received
+                notification.setContentText(bundle.getString("title"));
+            } else {
+                notification.setContentText(bundle.getString("message"));
+            }
 
             String largeIcon = bundle.getString("largeIcon");
 
@@ -266,7 +265,9 @@ public class RNPushNotificationHelper {
             notification.setSmallIcon(smallIconResId);
             String bigText = bundle.getString("bigText");
 
-            if (bigText == null) {
+            if (bigText == null && bundle.getString("message") == null) {
+                bigText = bundle.getString("title");
+            } else if (bigText == null) {
                 bigText = bundle.getString("message");
             }
 
